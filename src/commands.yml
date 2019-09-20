@@ -1,0 +1,20 @@
+name: rtail 
+version: "0.0.1"
+author: Relaed <knarfytrebil@gmail.com>
+about: read remote files over http / https
+args:
+    - follow:
+        short: f 
+        long: follow 
+        help: Continuesly watch the change of the url
+        takes_value: false 
+    - seconds:
+        short: s
+        long: seconds
+        help: Interval of the poll
+        takes_value: true
+        value_name: interval 
+    - INPUT:
+        help: URL of the file to read
+        required: true
+        index: 1
