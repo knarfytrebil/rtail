@@ -1,8 +1,11 @@
 #[macro_use]
 extern crate clap;
+extern crate ctrlc;
 
 use std::sync::mpsc::{channel, Sender, Receiver};
-use std::{thread, str, time};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::{thread, str, time, process};
 
 use clap::App;
 use curl::easy::Easy;
@@ -11,9 +14,25 @@ use curl::easy::Easy;
 fn main() {
     let conf = load_yaml!("commands.yml");
     let matches = App::from_yaml(conf).get_matches();
+    let running = Arc::new(AtomicUsize::new(0)); 
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        let prev = r.fetch_add(1, Ordering::SeqCst);
+        if prev == 0 {
+            println!("Exiting ...");
+        } else {
+            process::exit(0);
+        }
+    }).expect("Error setting ctrl-c handler");
 
     let mut last_pos = 0;
-    let interval = matches.value_of("milliseconds").unwrap_or("1000").parse::<u64>().unwrap();
+
+    let interval = matches
+        .value_of("milliseconds")
+        .unwrap_or("1000")
+        .parse::<u64>()
+        .unwrap();
 
     if let Some(values) = matches.values_of("INPUT") {
         let url: Vec<String> = values
@@ -21,26 +40,23 @@ fn main() {
             .map(|v| { v.to_string() })
             .collect();
 
-        let (tx, rx) = channel::<usize>();
-
-        loop {
-            thread::spawn(move || { fetch_url(&url[0], tx.clone()); });
-            last_pos = process_resp(rx.clone());
-            let duration = time::Duration::from_millis(interval);
-            thread::sleep(duration);
-        }
-
+        fetch_url(&url[0], interval, running, last_pos); 
         println!("[ INFO]: End of Data, total length: {}", last_pos);
     }
 }
 
-fn process_resp(receiver: Receiver<usize>) -> usize {
+fn process_resp(receiver: Receiver<String>, last_pos: usize) -> usize {
     let mut total_length = 0;
     loop {
         match receiver.recv() {
-            Ok(length) => {
+            Ok(s) => {
+                let length = s.chars().count();
                 if length != 0 {
                     total_length += length; 
+                    if total_length > last_pos {
+                        print!("{}", s);
+                        // println!("{}, {}", total_length, last_pos); 
+                    }
                 } else {
                     break;
                 }
@@ -53,7 +69,9 @@ fn process_resp(receiver: Receiver<usize>) -> usize {
     total_length
 }
 
-fn fetch_url(url_str: &str, sender: Sender<usize>) {
+fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, mut last_pos: usize) {
+    let (sender, rx) = channel::<String>();
+    let duration = time::Duration::from_millis(interval);
     let mut easy = Easy::new();
     easy.url(url_str).unwrap();
 
@@ -62,20 +80,25 @@ fn fetch_url(url_str: &str, sender: Sender<usize>) {
         let s = match str::from_utf8(buf) {
             Ok(v) => v,
             Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-        };
-        // stdout().write_all(s).unwrap();
-        println!("{}", s);
-        let _ = count_tx.send(s.chars().count());
+        }.to_string();
+        let _ = count_tx.send(s); 
         Ok(buf.len())
     }).unwrap();
 
     let req_tx = sender.clone();
     match easy.perform() {
         Ok(_) => {
-            let _ = req_tx.send(0);
+            let _ = req_tx.send("".to_string());
         }
         Err(e) => {
             println!("[ERROR]: {}", e);
         }
+    }
+
+    last_pos = process_resp(rx, last_pos);
+    thread::sleep(duration);
+
+    if running.load(Ordering::SeqCst) <= 0 {
+        fetch_url(url_str, interval, running, last_pos);
     }
 }

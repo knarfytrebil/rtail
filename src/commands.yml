@@ -9,8 +9,8 @@ args:
         help: Continuesly watch the change of the url
         takes_value: false 
     - seconds:
-        short: s
-        long: seconds
+        short: m 
+        long: milliseconds
         help: Interval of the poll
         takes_value: true
         value_name: interval 
