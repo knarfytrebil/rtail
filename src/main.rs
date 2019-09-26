@@ -2,7 +2,7 @@
 extern crate clap;
 extern crate ctrlc;
 
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::mpsc::{channel, Receiver};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::{thread, str, time, process};
@@ -26,8 +26,6 @@ fn main() {
         }
     }).expect("Error setting ctrl-c handler");
 
-    let mut last_pos = 0;
-
     let interval = matches
         .value_of("milliseconds")
         .unwrap_or("1000")
@@ -39,23 +37,22 @@ fn main() {
             .into_iter()
             .map(|v| { v.to_string() })
             .collect();
-
-        fetch_url(&url[0], interval, running, last_pos); 
-        println!("[ INFO]: End of Data, total length: {}", last_pos);
+        fetch_url(&url[0], interval, running, 0); 
     }
 }
 
 fn process_resp(receiver: Receiver<String>, last_pos: usize) -> usize {
-    let mut total_length = 0;
+    let total_length = Arc::new(AtomicUsize::new(0)); 
     loop {
         match receiver.recv() {
             Ok(s) => {
                 let length = s.chars().count();
                 if length != 0 {
-                    total_length += length; 
-                    if total_length > last_pos {
+                    let _prev = total_length.fetch_add(length, Ordering::SeqCst);
+                    let t = total_length.load(Ordering::SeqCst);
+                    if t > last_pos {
                         print!("{}", s);
-                        // println!("{}, {}", total_length, last_pos); 
+                        println!("{}, {}", t, last_pos); 
                     }
                 } else {
                     break;
@@ -66,7 +63,7 @@ fn process_resp(receiver: Receiver<String>, last_pos: usize) -> usize {
             }
         }
     }
-    total_length
+    total_length.load(Ordering::SeqCst)
 }
 
 fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, mut last_pos: usize) {
@@ -97,6 +94,7 @@ fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, mut last_p
 
     last_pos = process_resp(rx, last_pos);
     thread::sleep(duration);
+    println!("[ INFO]: End of Response, total length: {}", last_pos);
 
     if running.load(Ordering::SeqCst) <= 0 {
         fetch_url(url_str, interval, running, last_pos);
