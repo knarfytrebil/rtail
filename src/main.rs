@@ -97,11 +97,9 @@ fn fetch_url(
     let length = last_buffer.chars().count();
 
     print!("{}", &last_buffer[last_pos..length]);
-    
-    thread::sleep(duration);
-    // println!("[ INFO]: End of Response, total length: {}", last_pos);
 
     if running.load(Ordering::SeqCst) <= 0 && follow {
+        thread::sleep(duration);
         fetch_url(url_str, interval, running, length, follow);
     }
 }
