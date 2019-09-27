@@ -37,7 +37,7 @@ fn main() {
             .into_iter()
             .map(|v| { v.to_string() })
             .collect();
-        fetch_url(&url[0], interval, running, 0); 
+        fetch_url(&url[0], interval, running, 0, matches.is_present("follow"));
     }
 }
 
@@ -61,7 +61,13 @@ fn process_resp(receiver: Receiver<String>) -> String {
     buffer
 }
 
-fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, last_pos: usize) {
+fn fetch_url(
+    url_str: &str, 
+    interval: u64, 
+    running: Arc<AtomicUsize>, 
+    last_pos: usize,
+    follow: bool
+) {
     let (sender, rx) = channel::<String>();
     let duration = time::Duration::from_millis(interval);
     let mut easy = Easy::new();
@@ -95,7 +101,7 @@ fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, last_pos: 
     thread::sleep(duration);
     // println!("[ INFO]: End of Response, total length: {}", last_pos);
 
-    if running.load(Ordering::SeqCst) <= 0 {
-        fetch_url(url_str, interval, running, length);
+    if running.load(Ordering::SeqCst) <= 0 && follow {
+        fetch_url(url_str, interval, running, length, follow);
     }
 }
