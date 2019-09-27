@@ -10,9 +10,10 @@ documentation = "https://github.com/knarfytrebil/rtail"
 license = "MIT"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 curl = "0.4.23"
 ctrlc = "3.1.3"
 clap = { version = "~2.33.0", features = ["yaml"] }
+
+[badges]
+travis-ci = { repository = "knarfytrebil/rtail" }
