@@ -31,4 +31,4 @@ ARGS:
 
 ## License
 
-MIT
+MIT License
