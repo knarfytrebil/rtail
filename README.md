@@ -28,3 +28,7 @@ ARGS:
     <URL>    URL of the file to read
 
 ```
+
+## License
+
+MIT
