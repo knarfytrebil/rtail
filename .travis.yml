@@ -1,11 +1,16 @@
 language: rust
-branches:
-    only:
-        - master
-        - stable
+# branches:
+#     only:
+#         - master
+#         - stable
 script:
     - cargo build --verbose --all
 rust:
     - nightly
     - stable
 cache: cargo
+deploy:
+    provider: cargo
+    edge: true
+    on:
+        tags: true
