@@ -14,7 +14,7 @@ args:
         help: Interval of the poll
         takes_value: true
         value_name: interval 
-    - INPUT:
+    - URL:
         help: URL of the file to read
         required: true
         index: 1

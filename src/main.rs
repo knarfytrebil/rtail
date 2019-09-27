@@ -32,7 +32,7 @@ fn main() {
         .parse::<u64>()
         .unwrap();
 
-    if let Some(values) = matches.values_of("INPUT") {
+    if let Some(values) = matches.values_of("URL") {
         let url: Vec<String> = values
             .into_iter()
             .map(|v| { v.to_string() })
