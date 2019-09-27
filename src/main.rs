@@ -41,19 +41,14 @@ fn main() {
     }
 }
 
-fn process_resp(receiver: Receiver<String>, last_pos: usize) -> usize {
-    let total_length = Arc::new(AtomicUsize::new(0)); 
+fn process_resp(receiver: Receiver<String>, last_pos: usize) -> String {
+    let mut buffer = String::new();
     loop {
         match receiver.recv() {
             Ok(s) => {
                 let length = s.chars().count();
                 if length != 0 {
-                    let _prev = total_length.fetch_add(length, Ordering::SeqCst);
-                    let t = total_length.load(Ordering::SeqCst);
-                    if t > last_pos {
-                        print!("{}", s);
-                        println!("{}, {}", t, last_pos); 
-                    }
+                    buffer.push_str(&s);
                 } else {
                     break;
                 }
@@ -63,7 +58,7 @@ fn process_resp(receiver: Receiver<String>, last_pos: usize) -> usize {
             }
         }
     }
-    total_length.load(Ordering::SeqCst)
+    buffer
 }
 
 fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, mut last_pos: usize) {
@@ -92,11 +87,15 @@ fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, mut last_p
         }
     }
 
-    last_pos = process_resp(rx, last_pos);
+    let last_buffer = process_resp(rx, last_pos);
+    let length = last_buffer.chars().count();
+
+    print!("{}", &last_buffer[last_pos..length]);
+    
     thread::sleep(duration);
-    println!("[ INFO]: End of Response, total length: {}", last_pos);
+    // println!("[ INFO]: End of Response, total length: {}", last_pos);
 
     if running.load(Ordering::SeqCst) <= 0 {
-        fetch_url(url_str, interval, running, last_pos);
+        fetch_url(url_str, interval, running, length);
     }
 }
