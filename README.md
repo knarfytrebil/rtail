@@ -9,7 +9,7 @@ cargo install rtail
 
 ## Usage
 ```bash
-rtail 0.1.2
+rtail 0.1.3
 Relaed <knarfytrebil@gmail.com>
 read remote files over http / https
 
