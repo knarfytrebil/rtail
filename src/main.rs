@@ -41,7 +41,7 @@ fn main() {
     }
 }
 
-fn process_resp(receiver: Receiver<String>, last_pos: usize) -> String {
+fn process_resp(receiver: Receiver<String>) -> String {
     let mut buffer = String::new();
     loop {
         match receiver.recv() {
@@ -61,7 +61,7 @@ fn process_resp(receiver: Receiver<String>, last_pos: usize) -> String {
     buffer
 }
 
-fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, mut last_pos: usize) {
+fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, last_pos: usize) {
     let (sender, rx) = channel::<String>();
     let duration = time::Duration::from_millis(interval);
     let mut easy = Easy::new();
@@ -87,7 +87,7 @@ fn fetch_url(url_str: &str, interval: u64, running: Arc<AtomicUsize>, mut last_p
         }
     }
 
-    let last_buffer = process_resp(rx, last_pos);
+    let last_buffer = process_resp(rx);
     let length = last_buffer.chars().count();
 
     print!("{}", &last_buffer[last_pos..length]);
