@@ -2,7 +2,12 @@
 name = "rtail"
 version = "0.1.0"
 authors = ["Relaed <knarfytrebil@gmail.com>"]
-
+description = "read remote files over http / https"
+keywords = ["rtail", "tail", "https", "rust"]
+homepage = "https://github.com/knarfytrebil/rtail"
+repository = "https://github.com/knarfytrebil/rtail"
+documentation = "https://github.com/knarfytrebil/rtail"
+license = "MIT"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
