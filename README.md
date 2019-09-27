@@ -1,6 +1,6 @@
 # rtail
 [![Build Status](https://travis-ci.org/knarfytrebil/rtail.svg?branch=master)](https://travis-ci.org/knarfytrebil/rtail)
-![Crates.io](https://img.shields.io/crates/v/rtail)
+[![Crates.io](https://img.shields.io/crates/v/rtail)](https://crates.io/crates/rtail)
 
 ## Installation
 ```bash
