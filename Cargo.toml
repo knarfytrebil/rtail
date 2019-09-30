@@ -5,6 +5,7 @@ authors = ["Relaed <knarfytrebil@gmail.com>"]
 description = "read remote files over http / https"
 keywords = ["rtail", "tail", "https", "rust"]
 homepage = "https://github.com/knarfytrebil/rtail"
+readme = "README.md"
 repository = "https://github.com/knarfytrebil/rtail"
 documentation = "https://github.com/knarfytrebil/rtail"
 license = "MIT"
