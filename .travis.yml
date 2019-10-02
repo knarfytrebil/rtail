@@ -1,16 +1,15 @@
 language: rust
-# branches:
-#     only:
-#         - master
-#         - stable
 script:
     - cargo build --verbose --all
 rust:
     - nightly
     - stable
 cache: cargo
+
 deploy:
     provider: cargo
     edge: true
     on:
         tags: true
+        condition: "$TRAVIS_RUST_VERSION = stable && $TRAVIS_OS_NAME = linux"
+        branch: master
