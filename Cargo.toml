@@ -14,7 +14,7 @@ edition = "2018"
 [dependencies]
 curl = "0.4.23"
 ctrlc = "3.1.4"
-clap = { version = "~2.33.0", features = ["yaml"] }
+clap = { version = "~2.33.1", features = ["yaml"] }
 
 [badges]
 travis-ci = { repository = "knarfytrebil/rtail" }
