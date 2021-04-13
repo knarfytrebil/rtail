@@ -13,7 +13,7 @@ edition = "2018"
 
 [dependencies]
 curl = "0.4.33"
-ctrlc = "3.1.6"
+ctrlc = "3.1.9"
 clap = { version = "~2.33.3", features = ["yaml"] }
 
 [badges]
