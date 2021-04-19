@@ -12,7 +12,7 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-curl = "0.4.33"
+curl = "0.4.36"
 ctrlc = "3.1.6"
 clap = { version = "~2.33.3", features = ["yaml"] }
 
